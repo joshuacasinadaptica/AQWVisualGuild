@@ -1,0 +1,5 @@
+{
+  "name": "Visual Guild HQ",
+  "description": "A premium, minimal web interface for the legacy MMORPG guild 'Visual', featuring roster management, event tracking, and quest boards.",
+  "requestFramePermissions": []
+}
