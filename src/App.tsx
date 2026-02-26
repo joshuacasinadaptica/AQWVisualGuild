@@ -14,6 +14,7 @@ import {
   Trophy as TrophyIcon, 
   LogOut, 
   ChevronRight, 
+  ChevronLeft,
   Shield, 
   Sword, 
   Zap, 
@@ -1588,7 +1589,7 @@ const InvitesView = ({ invites, setInvites }: { invites: InviteCode[], setInvite
   );
 };
 
-const JoinView = ({ onJoinSuccess, invites }: { onJoinSuccess: () => void, invites: InviteCode[] }) => {
+const JoinView = ({ onJoinSuccess, onBack, invites }: { onJoinSuccess: () => void, onBack?: () => void, invites: InviteCode[] }) => {
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<'idle' | 'validating' | 'verified' | 'error' | 'success'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
@@ -1630,7 +1631,16 @@ const JoinView = ({ onJoinSuccess, invites }: { onJoinSuccess: () => void, invit
 
   if (status === 'success') {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
+      <div className="min-h-[60vh] flex flex-col items-center justify-center gap-6">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-slate-400 hover:text-slate-200 text-sm font-medium transition-colors"
+          >
+            <ChevronLeft size={18} />
+            Back to home
+          </button>
+        )}
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -1655,7 +1665,16 @@ const JoinView = ({ onJoinSuccess, invites }: { onJoinSuccess: () => void, invit
   }
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center p-4">
+    <div className="min-h-[70vh] relative flex items-center justify-center p-4">
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="absolute top-6 left-6 flex items-center gap-2 text-slate-400 hover:text-slate-200 text-sm font-medium transition-colors z-10"
+        >
+          <ChevronLeft size={18} />
+          Back to home
+        </button>
+      )}
       <Card className="w-full max-w-md p-8 border-white/10 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-guild-accent to-transparent opacity-50" />
         
@@ -1874,14 +1893,27 @@ export default function App() {
   const [showSuggestModal, setShowSuggestModal] = useState(false);
   const [suggestion, setSuggestion] = useState({ title: '', description: '', steps: '' });
 
+  const underConstructionBanner = (
+    <div className="sticky top-0 left-0 right-0 w-full z-[60] flex items-center justify-center gap-2 px-4 py-2.5 bg-amber-500/95 text-slate-900 text-sm font-semibold shadow-lg border-b border-amber-600/50">
+      <AlertTriangle size={18} className="shrink-0" aria-hidden />
+      <span>This site is still under construction</span>
+    </div>
+  );
+
   if (view === 'landing') {
-    return <LandingPage onEnter={() => setView('dashboard')} onJoin={() => setView('join')} />;
+    return (
+      <>
+        {underConstructionBanner}
+        <LandingPage onEnter={() => setView('dashboard')} onJoin={() => setView('join')} />
+      </>
+    );
   }
 
   if (view === 'join') {
     return (
       <div className="min-h-screen bg-guild-bg text-slate-200 font-sans selection:bg-guild-accent/30">
-        <JoinView invites={invites} onJoinSuccess={() => setView('dashboard')} />
+        {underConstructionBanner}
+        <JoinView invites={invites} onJoinSuccess={() => setView('dashboard')} onBack={() => setView('landing')} />
       </div>
     );
   }
@@ -1918,7 +1950,7 @@ export default function App() {
       case 'permissions': return <PermissionsMatrixView />;
       case 'invites': return isLeader ? <InvitesView invites={invites} setInvites={setInvites} /> : <DashboardView />;
       case 'members': return isAdmin ? <MembersManagementView members={members} setMembers={setMembers} /> : <DashboardView />;
-      case 'join': return <JoinView invites={invites} onJoinSuccess={() => setView('dashboard')} />;
+      case 'join': return <JoinView invites={invites} onJoinSuccess={() => setView('dashboard')} onBack={() => setView('landing')} />;
       case 'farming': return (
         <>
           <FarmingView guides={guides} onSuggest={() => setShowSuggestModal(true)} />
@@ -2007,7 +2039,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-guild-bg flex text-slate-200">
+    <div className="min-h-screen bg-guild-bg flex flex-wrap text-slate-200">
+      <div className="w-full shrink-0">{underConstructionBanner}</div>
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-guild-card/80 backdrop-blur-lg border-b border-white/5 z-50 flex items-center justify-between px-6">
         <h1 className="font-display font-bold text-xl tracking-tighter text-white">VISUAL</h1>
